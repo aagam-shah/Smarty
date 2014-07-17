@@ -27,6 +27,7 @@ import static java.lang.Thread.sleep;
 public class BGService extends android.app.Service {
 
     public WebSocketClient mWebSocketClient;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -51,14 +52,20 @@ public class BGService extends android.app.Service {
     private void connectChatty() {
         Log.e("start chatty", "");
 
+
+        mWebSocketClient = newClient();
+        mWebSocketClient.connect();
+
+    }
+
+    private WebSocketClient newClient() {
         URI uri;
         try {
             uri = new URI("ws://backendtest-appxtest.rhcloud.com:8000");
         } catch (URISyntaxException e) {
             e.printStackTrace();
-            return;
+            return null;
         }
-
         mWebSocketClient = new WebSocketClient(uri) {
             @Override
             public void onOpen(ServerHandshake serverHandshake) {
@@ -73,19 +80,22 @@ public class BGService extends android.app.Service {
 
             @Override
             public void onMessage(String s) {
+
+
+
                 final String message = s;
 
-                Gson gson =new Gson();
-                Message message1 = gson.fromJson(s,Message.class);
+                Gson gson = new Gson();
+                Message message1 = gson.fromJson(s, Message.class);
                 Log.e("onMessage", "" + s);
 
 
                 SharedPreferences prefs = getSharedPreferences("chatty", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("text",message1.getText());
-                editor.putString("name",message1.getHandle());
-                Date date =new Date();
-                editor.putString("date",""+date.toString());
+                editor.putString("text", message1.getText());
+                editor.putString("name", message1.getHandle());
+                Date date = new Date();
+                editor.putString("date", "" + date.toString());
                 editor.commit();
 
 
@@ -112,23 +122,31 @@ public class BGService extends android.app.Service {
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
+
+                mWebSocketClient.getConnection().close();
+
+                try {
+                    sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mWebSocketClient.connect();
             }
 
             @Override
             public void onError(Exception e) {
                 Log.e("Websocket", "Error " + e.getMessage());
+                mWebSocketClient.getConnection().close();
                 try {
-                    while (!mWebSocketClient.connectBlocking()){
-                        Log.e("error sleep","");
-                        sleep(2000);
-                    }
+                    sleep(2000);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
+                mWebSocketClient.connect();
             }
         };
-        mWebSocketClient.connect();
 
+        return mWebSocketClient;
     }
 
 }
