@@ -5,11 +5,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+
+import da.chatty.app.Events.ContactEvent;
 
 
 public class MainActivity extends Activity {
@@ -26,7 +33,16 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
 
                 Intent intent = new Intent(getApplicationContext(),BGService.class);
-                getApplicationContext().startService(intent);
+              GetContacts getContacts =new GetContacts();
+                HashMap<String,String> map = getContacts.get(getApplicationContext());
+                ContactEvent event = new ContactEvent();
+                event.setEvent("contacts");
+                event.setContacts(map);
+
+                Gson gson = new Gson();
+                String json =gson.toJson(event);
+                Log.e("json contact",json);
+              //  getApplicationContext().startService(intent);//
             }
         });
         TextView textView= (TextView)findViewById(R.id.text);

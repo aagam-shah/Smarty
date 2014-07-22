@@ -61,6 +61,8 @@ public class BGService extends android.app.Service {
     private WebSocketClient newClient() {
         URI uri;
         try {
+
+
             uri = new URI("ws://backendtest-appxtest.rhcloud.com:8000");
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -117,7 +119,7 @@ public class BGService extends android.app.Service {
             @Override
             public void onClose(int i, String s, boolean b) {
                 Log.e("Websocket", "Closed " + s);
-//                try {
+//                try {//
 //                    while (!mWebSocketClient.connectBlocking()){}
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
